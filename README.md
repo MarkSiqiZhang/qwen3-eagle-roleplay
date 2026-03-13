@@ -3,7 +3,8 @@
 ## Project Overview
 
 **Background & Motivation**
-In immersive LLM role-play, the illusion of conversing with a real character relies heavily on the fluidity and speed of the interaction. To truly simulate a live, human-like dialogue, the model must generate text at a pace that matches or exceeds natural human reading and typing speeds. Therefore, maximizing the token generation throughput (Tokens-Per-Second, or TPS) is paramount. When the text generation is sluggish or stutters, it instantly breaks the immersion, constantly reminding the user they are waiting on a machine. However, achieving high sustained throughput with Large Language Models (LLMs) is severely bottlenecked by memory bandwidth during autoregressive decoding, making it incredibly challenging to maintain the dynamic pace required for real-time role-play.
+In immersive Large Language Model (LLM) role-play, the user experience largely depends on the fluency and speed of the interaction. For example, when interacting with NPCs in a game, the model must generate text quickly enough to sustain the conversation. Otherwise, if the text generation is slow or stutters, users are forced to wait for the model’s response, which breaks the continuity of the interaction. Therefore, maximizing token generation throughput (Tokens Per Second, TPS) is crucial.
+However, during autoregressive decoding, the inference speed of large models is severely constrained by memory bandwidth bottlenecks.
 
 **The Challenge**
 Speculative Decoding algorithms (e.g., EAGLE 3) are designed specifically to break this memory bandwidth bottleneck and massively increase throughput. They achieve this by using a lightweight "draft" model to rapidly generate multiple token candidates, which are then verified in parallel by the larger "target" model. 
@@ -18,8 +19,8 @@ This project introduces Joint Alignment Speculative Decoding. By simultaneously 
 **Goal:** Achieve high-speed, real-time role-play inference (high Tokens-Per-Second) without sacrificing the model's persona consistency or instruction-following capabilities.
 
 **Approach:**
-1. **Target Model SFT:** Fine-tune a base model (e.g., Llama-3-8B / Qwen-2.5-7B) on high-quality character data.
-2. **Draft Model Joint Alignment:** Apply SFT to a lightweight draft model (e.g., 0.5B or an EAGLE draft structure). To prevent overfitting on sparse character data, we employ data mixing strategies (blending general conversational SFT data with character-specific dialogue) and explore lightweight knowledge distillation from the target model.
+1. **Target Model SFT:** Fine-tune a base model (e.g., Qwen-3-8B) on high-quality character data.
+2. **Draft Model Joint Alignment:** Apply SFT to a lightweight draft model. To prevent overfitting on sparse character data, we employ data mixing strategies (blending general conversational SFT data with character-specific dialogue) and explore lightweight knowledge distillation from the target model.
 3. **Speculative Decoding:** Integrate the aligned models to execute fast, parallelized decoding.
 
 ---
