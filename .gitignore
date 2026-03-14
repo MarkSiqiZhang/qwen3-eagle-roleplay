@@ -1,0 +1,34 @@
+# Data
+data/roleplay_data/*
+data/rolebench/
+
+# Models / checkpoints
+models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs & outputs
+*.log
+wandb/
+runs/
+outputs/
