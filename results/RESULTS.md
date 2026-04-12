@@ -41,11 +41,35 @@
 
 ---
 
+## Baseline 1': Autoregressive with Persona-Tuned Target
+
+**Setup**: Qwen3-4B-jack-sparrow (fine-tuned), standard `model.generate()`, single GPU
+
+| Metric | Value |
+|---|---|
+| Avg TPS | 20.32 |
+| Median TPS | 20.17 |
+| Std TPS | 0.72 |
+| Avg TTFT | 72.44 ms |
+| Avg Output Length | 60.33 tokens |
+| Avg Total Time / Sample | 3,091 ms |
+| Total Runtime | 1,079 s |
+| **Speedup vs B1** | **1.07x** (TPS comparable; faster total due to shorter outputs) |
+
+---
+
 ## Baseline 2': EAGLE 3 with Persona-Tuned Target (General Draft)
 
-**Setup**: Qwen3-4B (fine-tuned on Jack Sparrow) + off-the-shelf EAGLE 3 draft model
+**Setup**: Qwen3-4B-jack-sparrow (fine-tuned) + off-the-shelf EAGLE 3 draft model, single GPU
 
-> Pending: requires target model SFT
+| Metric | Value |
+|---|---|
+| Avg TPS | 41.4 |
+| Median TPS | 40.5 |
+| Avg Acceptance Length | 2.75 |
+| Avg Output Length | 61.7 tokens |
+| Total Runtime | 470 s |
+| **Speedup vs B1'** | **2.04x** |
 
 ---
 
