@@ -65,6 +65,8 @@ def main():
     parser.add_argument("--output_dir", type=str, default="results/baseline2")
     parser.add_argument("--device", type=str, default="cuda:0")
     parser.add_argument("--max_new_tokens", type=int, default=512)
+    parser.add_argument("--min_new_tokens", type=int, default=0,
+                        help="Force minimum output length for fair TPS comparison")
     parser.add_argument("--max_length", type=int, default=2048)
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--top_p", type=float, default=0.8)
@@ -135,6 +137,7 @@ def main():
             top_p=args.top_p,
             top_k=args.top_k,
             max_new_tokens=args.max_new_tokens,
+            min_new_tokens=args.min_new_tokens,
             max_length=args.max_length,
             log=True,
         )

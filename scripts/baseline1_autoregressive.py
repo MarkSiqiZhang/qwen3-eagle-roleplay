@@ -149,6 +149,8 @@ def main():
     parser.add_argument("--output_dir", type=str, default="results/baseline1")
     parser.add_argument("--device", type=str, default="cuda:0")
     parser.add_argument("--max_new_tokens", type=int, default=512)
+    parser.add_argument("--min_new_tokens", type=int, default=0,
+                        help="Force minimum output length for fair TPS comparison")
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--top_p", type=float, default=0.8)
     parser.add_argument("--top_k", type=int, default=20)
@@ -167,6 +169,7 @@ def main():
 
     generation_kwargs = {
         "max_new_tokens": args.max_new_tokens,
+        "min_new_tokens": args.min_new_tokens if args.min_new_tokens > 0 else None,
         "do_sample": True,
         "temperature": args.temperature,
         "top_p": args.top_p,
