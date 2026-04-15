@@ -1,0 +1,29 @@
+{
+  "model": "models/Qwen3-4B-jack-sparrow",
+  "draft_model": "models/Qwen3-4B_eagle3_b3",
+  "method": "EAGLE 3 Speculative Decoding",
+  "dtype": "float16",
+  "device": "cuda:0",
+  "num_samples": 349,
+  "max_new_tokens": 256,
+  "eagle3_config": {
+    "total_token": 60,
+    "depth": 7,
+    "draft_top_k": 10
+  },
+  "generation_config": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20
+  },
+  "metrics": {
+    "avg_tps": 66.89,
+    "median_tps": 66.51,
+    "std_tps": 13.01,
+    "avg_accept_length": 4.25,
+    "median_accept_length": 4.21,
+    "avg_output_length": 258.66,
+    "avg_total_time_ms": 4027.57,
+    "total_generation_time_s": 1405.62
+  }
+}

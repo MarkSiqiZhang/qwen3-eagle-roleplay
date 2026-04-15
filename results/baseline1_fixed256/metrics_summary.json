@@ -1,0 +1,23 @@
+{
+  "model": "models/Qwen3-4B",
+  "dtype": "float16",
+  "device": "cuda:0",
+  "num_samples": 349,
+  "max_new_tokens": 256,
+  "generation_config": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "do_sample": true
+  },
+  "metrics": {
+    "avg_tps": 24.45,
+    "median_tps": 24.51,
+    "std_tps": 0.12,
+    "avg_ttft_ms": 72.43,
+    "median_ttft_ms": 69.11,
+    "avg_output_length": 256,
+    "avg_total_time_ms": 10542.8,
+    "total_generation_time_s": 3679.44
+  }
+}
