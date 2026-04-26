@@ -22,6 +22,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+import wandb
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -128,7 +129,16 @@ def main():
                         help="Device for frozen target model")
     parser.add_argument("--draft_device", type=str, default="cuda:1",
                         help="Device for trainable draft model")
+    parser.add_argument("--wandb_project", type=str, default="qwen3-eagle-draft")
+    parser.add_argument("--wandb_run_name", type=str, default=None,
+                        help="Defaults to output_dir basename")
+    parser.add_argument("--no_wandb", action="store_true", default=False)
     args = parser.parse_args()
+
+    use_wandb = not args.no_wandb
+    if use_wandb:
+        run_name = args.wandb_run_name or Path(args.output_dir).name
+        wandb.init(project=args.wandb_project, name=run_name, config=vars(args))
 
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
@@ -236,6 +246,18 @@ def main():
                 scheduler.step()
                 optimizer.zero_grad()
 
+                if use_wandb:
+                    log = {
+                        "train/loss": total_loss.item(),
+                        "train/acc": float(avg_acc),
+                        "train/lr": scheduler.get_last_lr()[0],
+                        "train/epoch_frac": epoch + (step + 1) / len(dataloader),
+                    }
+                    for i, (sl, sa) in enumerate(zip(step_losses, step_accs)):
+                        log[f"train/step{i}_loss"] = float(sl)
+                        log[f"train/step{i}_acc"] = float(sa)
+                    wandb.log(log)
+
             epoch_loss += total_loss.item()
             epoch_acc += avg_acc
             num_batches += 1
@@ -248,9 +270,20 @@ def main():
         print(f"Epoch {epoch+1}/{args.epochs} | Loss: {avg_loss:.4f} | Acc: {avg_acc:.4f} | "
               f"LR: {lr:.2e} | Time: {t_elapsed:.1f}s")
 
+        if use_wandb:
+            wandb.log({
+                "epoch": epoch + 1,
+                "train/epoch_loss": avg_loss,
+                "train/epoch_acc": float(avg_acc),
+                "train/epoch_time_s": t_elapsed,
+            })
+
         # Save checkpoint
         if (epoch + 1) % args.save_every == 0 or epoch == args.epochs - 1:
             save_draft_model(draft_model, args.draft_model_path, args.output_dir, epoch + 1)
+
+    if use_wandb:
+        wandb.finish()
 
     print(f"\nTraining complete. Final model saved to {args.output_dir}/")
 

@@ -17,6 +17,7 @@ import random
 from pathlib import Path
 
 from datasets import load_dataset
+from transformers import AutoTokenizer
 
 
 def load_character_data(path):
@@ -25,6 +26,13 @@ def load_character_data(path):
         for line in f:
             samples.append(json.loads(line))
     return samples
+
+
+def token_length(tokenizer, messages):
+    text = tokenizer.apply_chat_template(
+        messages, tokenize=False, enable_thinking=False
+    )
+    return len(tokenizer(text, add_special_tokens=False)["input_ids"])
 
 
 def convert_ultrachat_sample(sample):
@@ -70,30 +78,55 @@ def main():
     parser.add_argument("--output_path", type=str,
                         default="data/roleplay_data/mixed_train.jsonl")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--tokenizer_path", type=str,
+                        default="models/Qwen3-4B-jack-sparrow",
+                        help="Tokenizer for length filtering")
+    parser.add_argument("--max_token_length", type=int, default=0,
+                        help="Drop samples exceeding this token length (0 = no filter)")
     args = parser.parse_args()
 
     random.seed(args.seed)
 
+    tokenizer = None
+    if args.max_token_length > 0:
+        print(f"Loading tokenizer from {args.tokenizer_path} for length filtering...")
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path)
+
     # Load character data
     print(f"Loading character data from {args.character_data}...")
     char_data = load_character_data(args.character_data)
-    print(f"  {len(char_data)} character samples")
+    if tokenizer is not None:
+        before = len(char_data)
+        char_data = [s for s in char_data
+                     if token_length(tokenizer, s["messages"]) <= args.max_token_length]
+        print(f"  {len(char_data)} character samples (dropped {before - len(char_data)} over {args.max_token_length} tokens)")
+    else:
+        print(f"  {len(char_data)} character samples")
 
     # Download and process UltraChat 200K
     print("Downloading UltraChat 200K (train_sft split)...")
     ds = load_dataset("HuggingFaceH4/ultrachat_200k", split="train_sft")
     print(f"  {len(ds)} total samples in UltraChat 200K train_sft")
 
-    # Convert and filter
+    # Convert and filter (collect more than needed, then subsample)
     print("Converting UltraChat samples...")
     general_data = []
+    over_length = 0
+    target_pool = args.general_samples * 3 if tokenizer is not None else args.general_samples * 2
     for sample in ds:
         converted = convert_ultrachat_sample(sample)
-        if converted is not None:
-            general_data.append(converted)
-        if len(general_data) >= args.general_samples * 2:
-            # Collect 2x needed, then subsample for diversity
+        if converted is None:
+            continue
+        if tokenizer is not None:
+            if token_length(tokenizer, converted["messages"]) > args.max_token_length:
+                over_length += 1
+                continue
+        general_data.append(converted)
+        if len(general_data) >= target_pool:
             break
+
+    if tokenizer is not None:
+        print(f"  {over_length} UltraChat samples dropped for > {args.max_token_length} tokens")
 
     # Subsample to target count
     if len(general_data) > args.general_samples:
