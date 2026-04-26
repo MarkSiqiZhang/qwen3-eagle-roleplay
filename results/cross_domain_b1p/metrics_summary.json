@@ -1,0 +1,23 @@
+{
+  "model": "models/Qwen3-4B-jack-sparrow",
+  "dtype": "float16",
+  "device": "cuda:0",
+  "num_samples": 1000,
+  "max_new_tokens": 512,
+  "generation_config": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "do_sample": true
+  },
+  "metrics": {
+    "avg_tps": 22.5,
+    "median_tps": 22.82,
+    "std_tps": 1.63,
+    "avg_ttft_ms": 78.76,
+    "median_ttft_ms": 50.83,
+    "avg_output_length": 238.35,
+    "avg_total_time_ms": 10813.72,
+    "total_generation_time_s": 10813.72
+  }
+}

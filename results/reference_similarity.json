@@ -1,0 +1,142 @@
+{
+  "B1": {
+    "path": "results/baseline1/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 799.5,
+    "bleu": 2.84,
+    "rouge1": 22.51,
+    "rouge2": 6.94,
+    "rougeL": 15.52
+  },
+  "B1'": {
+    "path": "results/baseline1_prime/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 221.5,
+    "bleu": 9.05,
+    "rouge1": 32.64,
+    "rouge2": 11.35,
+    "rougeL": 24.19
+  },
+  "B2": {
+    "path": "results/baseline2/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 791.2,
+    "bleu": 2.82,
+    "rouge1": 22.95,
+    "rouge2": 6.85,
+    "rougeL": 15.58
+  },
+  "B2'": {
+    "path": "results/baseline2_finetuned/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 221.2,
+    "bleu": 8.6,
+    "rouge1": 32.45,
+    "rouge2": 11.77,
+    "rougeL": 24.07
+  },
+  "B3": {
+    "path": "results/baseline3/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 240.8,
+    "bleu": 9.06,
+    "rouge1": 32.84,
+    "rouge2": 12.02,
+    "rougeL": 24.43
+  },
+  "Proposed-A": {
+    "path": "results/proposed/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 236.1,
+    "bleu": 8.39,
+    "rouge1": 32.96,
+    "rouge2": 11.29,
+    "rougeL": 24.52
+  },
+  "Proposed-B": {
+    "path": "results/proposed_balanced/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 221.1,
+    "bleu": 8.52,
+    "rouge1": 32.73,
+    "rouge2": 11.54,
+    "rougeL": 23.99
+  },
+  "Proposed-C": {
+    "path": "results/proposed_balanced_20ep/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 349,
+    "avg_chars": 248.2,
+    "bleu": 8.72,
+    "rouge1": 32.4,
+    "rouge2": 11.7,
+    "rougeL": 24.31
+  },
+  "B1-UC": {
+    "path": "results/cross_domain_b1/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 1000,
+    "avg_chars": 1843.0,
+    "bleu": 7.23,
+    "rouge1": 43.59,
+    "rouge2": 17.18,
+    "rougeL": 24.37
+  },
+  "B1'-UC": {
+    "path": "results/cross_domain_b1p/generation_outputs.jsonl",
+    "strip_pad": false,
+    "n": 1000,
+    "avg_chars": 1137.5,
+    "bleu": 12.53,
+    "rouge1": 42.82,
+    "rouge2": 18.89,
+    "rougeL": 27.72
+  },
+  "B2'-UC": {
+    "path": "results/cross_domain_b2p/generation_outputs.jsonl",
+    "strip_pad": true,
+    "n": 349,
+    "avg_chars": 1077.1,
+    "bleu": 10.8,
+    "rouge1": 38.64,
+    "rouge2": 15.65,
+    "rougeL": 24.82
+  },
+  "B3-UC": {
+    "path": "results/cross_domain_b3/generation_outputs.jsonl",
+    "strip_pad": true,
+    "n": 349,
+    "avg_chars": 1067.9,
+    "bleu": 10.98,
+    "rouge1": 38.0,
+    "rouge2": 15.23,
+    "rougeL": 24.39
+  },
+  "Proposed-B-UC": {
+    "path": "results/cross_domain_proposed_b/generation_outputs.jsonl",
+    "strip_pad": true,
+    "n": 349,
+    "avg_chars": 1063.9,
+    "bleu": 11.3,
+    "rouge1": 38.56,
+    "rouge2": 15.94,
+    "rougeL": 25.16
+  },
+  "Proposed-C-UC": {
+    "path": "results/cross_domain_proposed_c/generation_outputs.jsonl",
+    "strip_pad": true,
+    "n": 349,
+    "avg_chars": 1063.0,
+    "bleu": 11.17,
+    "rouge1": 38.95,
+    "rouge2": 16.16,
+    "rougeL": 25.24
+  }
+}
