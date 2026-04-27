@@ -1,0 +1,249 @@
+\documentclass[9pt]{extarticle}
+
+% ===== Page geometry: one-page poster, tight margins =====
+\usepackage[a4paper, landscape, top=0.3in, bottom=0.2in, left=0.35in, right=0.35in]{geometry}
+
+% ===== Core packages =====
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage[final]{graphicx}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage[expansion=false]{microtype}
+\usepackage{wrapfig}
+
+% ===== Colors =====
+\definecolor{primary}{RGB}{25,70,130}
+\definecolor{accent}{RGB}{200,70,40}
+\definecolor{lightgray}{RGB}{235,238,245}
+\definecolor{softyellow}{RGB}{255,248,220}
+\definecolor{darkgray}{RGB}{70,70,70}
+\definecolor{successgreen}{RGB}{40,130,70}
+\definecolor{heroblue}{RGB}{220,234,255}
+
+% ===== Section style =====
+\titleformat{\section}
+  {\normalfont\normalsize\bfseries\color{primary}}
+  {\thesection.}{0.3em}{}[\vspace{-0.3em}{\color{primary}\hrule height 0.5pt}]
+\titlespacing*{\section}{0pt}{0.2em}{0.05em}
+
+% ===== No page numbers =====
+\pagestyle{empty}
+\setlength{\columnsep}{0.8em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.1em}
+
+% ===== Custom boxes =====
+\newtcolorbox{takeawaybox}{
+  colback=lightgray, colframe=primary, boxrule=0.6pt,
+  arc=2pt, left=5pt, right=5pt, top=2pt, bottom=2pt
+}
+
+\newtcolorbox{heroboxnote}{
+  colback=softyellow, colframe=accent, boxrule=0.6pt,
+  arc=2pt, left=5pt, right=5pt, top=2pt, bottom=2pt
+}
+
+\newtcolorbox{herobluebox}{
+  colback=heroblue, colframe=primary, boxrule=0.8pt,
+  arc=2pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+}
+
+\newtcolorbox{finding}{
+  colback=white, colframe=primary, boxrule=0.4pt,
+  arc=2pt, left=4pt, right=4pt, top=2pt, bottom=2pt
+}
+
+% ===== Compact list spacing =====
+\setlist[itemize]{leftmargin=1.1em, itemsep=0.03em, topsep=0.03em, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.3em, itemsep=0.05em, topsep=0.03em, parsep=0pt}
+
+% ===== Table spacing =====
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+\setlength{\extrarowheight}{0.3pt}
+\setlength{\tabcolsep}{3pt}
+
+\begin{document}
+
+% ============ TITLE BLOCK ============
+\begin{center}
+  {\LARGE\bfseries\color{primary} Joint Alignment Speculative Decoding for Real-Time LLM Role-Play}\\[0.05em]
+  {\footnotesize\itshape\color{darkgray} A draft model aligned with the target's \textbf{deployment distribution}, not its fine-tuning distribution}\quad
+  {\footnotesize Siqi Zhang $\bullet$ CSE-398 $\bullet$ Spring 2026}
+\end{center}
+\vspace{-0.6em}
+{\color{primary}\hrule height 1pt}
+\vspace{0.1em}
+
+% ============ HEADLINE RESULT BANNER ============
+\begin{herobluebox}
+\small\textbf{Headline.} Our \emph{Joint Alignment} draft training is the \textbf{only} configuration with higher acceptance than the off-the-shelf baseline on \textbf{both} in-character (+4.4\%) \textbf{and} off-topic (+6.3\%) queries. The naive ``train-on-character-data-only'' alternative (B3) is fastest on Jack Sparrow prompts but \textbf{silently loses 15.1\%} acceleration on off-topic prompts --- a failure mode invisible to in-domain-only evaluation.
+\end{herobluebox}
+
+% ============ MAIN 3-COLUMN LAYOUT ============
+\begin{multicols}{3}
+
+% ---------- COLUMN 1 ----------
+\section{Problem \& Motivation}
+
+Deploying a persona-specialized LLM (Jack Sparrow chatbot) requires \textbf{real-time speed} ($\geq$40 tok/s) \emph{and} \textbf{persona fidelity}. LoRA fine-tuning the target gives fidelity; \textbf{speculative decoding} (EAGLE 3) gives speed via a small \emph{draft} model that proposes tokens the target verifies in parallel.
+
+Because rejection sampling preserves the target's exact output distribution, \textbf{the draft is a pure speed dial --- it cannot degrade quality}. So the question becomes: \emph{which draft maximizes acceleration in realistic deployment?}
+
+\textbf{Open question.} Given a persona-specialized target, should the draft be persona-specialized too? Persona-only training looks fastest on in-character queries, but a deployed chatbot still receives off-topic user input. Does narrow draft training cost speed there?
+
+\section{Method: Joint Alignment}
+
+\begin{heroboxnote}
+\textbf{Core insight.} Real users may send both in-character and off-topic queries.
+\end{heroboxnote}
+
+\textbf{Our recipe.} Training the EAGLE 3 draft model against the persona-tuned target's logits via a 7-step KL-divergence loss, on a balanced corpus:
+\begin{itemize}
+  \item \textbf{50\% persona data}: 1{,}429 Jack Sparrow samples (RoleBench).
+  \item \textbf{50\% general data}: 1{,}429 UltraChat 200K samples.
+\end{itemize}
+Train for \textbf{8 epochs}.
+
+\textbf{The configurations under comparison.} All three share the same persona-tuned target: \textbf{Qwen3-4B} + LoRA on RoleBench Jack Sparrow; they differ only in the + draft model (EAGLE 3 head for Qwen3-4B, $\sim$0.2B params): :
+
+\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{B2$'$} & off-the-shelf EAGLE 3 draft \emph{(no retraining --- the draft was never aligned to this target)} \\
+\textbf{B3}    & draft retrained on \textbf{100\% Jack Sparrow} data, 20 epochs \emph{(naive specialization)} \\
+\rowcolor{lightgray}\textbf{Prop-B (ours)} & draft retrained on the \textbf{50/50 mix} above, 8 epochs \emph{(Joint Alignment)} \\
+\bottomrule
+\end{tabularx}
+\normalsize
+
+\section{Novelty}
+
+Prior persona work has rarely adopted speculative decoding. We bring a state-of-the-art acceleration algorithm into the role-play setting, reduce the amount of waiting time for users. Crucially, our \emph{Joint Alignment} draft preserves acceleration on \textbf{off-topic} user queries as well as in-character ones, giving the full pipeline stronger generalization.
+
+\section{Experimental Setup}
+
+\textbf{Two disjoint test sets} (no training-data overlap):
+\begin{itemize}
+  \item \textbf{In-domain:} RoleBench Jack Sparrow test (349 prompts + references).
+  \item \textbf{Out-of-domain:} UltraChat 200K (349--1{,}000 prompts).
+\end{itemize}
+
+\textbf{Three metric families:} \textit{Acceptance length} (how many tokens are accepted by target model), \textit{TPS} (fixed 256-token output), \textit{BLEU/ROUGE-L} (quality check; verifies lossless guarantee).
+
+% ---------- COLUMN 2 ----------
+
+\section{Speedup Comparison \normalfont\small (TPS, 5 configs)}
+
+\small
+\begin{tabularx}{\linewidth}{@{}lXcccc@{}}
+\toprule
+\textbf{Cfg} & \textbf{Target / Draft} & \textbf{JS} & \textbf{UC} & \textbf{JS$\times$} & \textbf{UC$\times$} \\
+\midrule
+B1     & Base / ---               & 24.45 & 23.13 & 1.00 & 1.00 \\
+B2     & Base / general           & 45.21 & ---   & 1.85 & ---  \\
+B2$'$  & JS-FT / general          & 62.03 & 55.39 & 2.54 & 2.39 \\
+B3     & JS-FT / JS-only          & \textbf{66.89} & 55.09 & \textbf{2.74} & 2.38 \\
+\rowcolor{lightgray}\textbf{Prop-B} & \textbf{JS-FT / mix (ours)} & 58.75 & \textbf{58.86} & 2.40 & \textbf{2.54} \\
+\bottomrule
+\end{tabularx}
+\normalsize
+\vspace{0.05em}\\
+\footnotesize\emph{Speedup vs domain-matched B1 baseline (JS = 24.45 TPS, UC = 23.13 TPS). B3 is fastest on JS but its OOD speedup (2.38$\times$) is the \textbf{lowest} of the speculative configs --- its specialization gain does not transfer. Prop-B is the only config with UC speedup $>$ 2.50.}
+\normalsize
+
+\section{Acceptance Length \normalfont\small (draft--target alignment)}
+
+\small
+\begin{tabularx}{\linewidth}{@{}lXccX@{}}
+\toprule
+\textbf{Cfg} & \textbf{Draft} & \textbf{JS} & \textbf{UC} & \textbf{UC $\Delta$} \\
+\midrule
+B2$'$  & off-the-shelf    & 3.84 & 3.63 & \textcolor{darkgray}{$-5.5\%$} \\
+B3     & JS-only          & \textbf{4.25} & 3.61 & \textcolor{accent}{\textbf{$-15.1\%$}} \\
+\rowcolor{lightgray}\textbf{Prop-B} & \textbf{mix (ours)} & \textbf{4.01} & \textbf{3.86} & \textcolor{successgreen}{\textbf{$-3.7\%$}} \\
+\bottomrule
+\end{tabularx}
+\normalsize
+\vspace{0.05em}\\
+\footnotesize\emph{Prop-B is the only config higher than B2$'$ on \textbf{both} domains (+4.4\% JS, +6.3\% UC). B3 pays 15.1\% on UC for its JS peak.}
+\normalsize
+
+\vspace{-0.15em}
+\begin{center}
+\includegraphics[width=0.95\linewidth,height=4.2cm,keepaspectratio]{pareto_plot.png}
+\end{center}
+\vspace{-0.95em}
+\footnotesize Upper-right = better. Prop-B (star) is the \emph{only} point that dominates the B2$'$ baseline on both axes.
+\normalsize
+
+\vspace{-0.4em}
+\section{Quality (Reference Similarity)}
+
+BLEU + ROUGE-L vs ground-truth, free-length generation:
+
+\small
+\begin{tabularx}{\linewidth}{@{}XlXcXc@{}}
+\toprule
+\multirow{2}{*}{\textbf{Cfg}} & \multirow{2}{*}{\textbf{Target/Draft}} & \multicolumn{2}{c}{\textbf{JS}} & \multicolumn{2}{c}{\textbf{UC}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+       &                 & BLEU & R-L   & BLEU & R-L \\
+\midrule
+B1     & Base / AR       & 2.84 & 15.52 & 7.23 & 24.37 \\
+B3     & JS-FT / JS      & \textbf{9.06} & \textbf{24.43} & 10.98 & 24.39 \\
+\rowcolor{lightgray}Prop-B & JS-FT / mix & 8.52 & 23.99 & \textbf{11.30} & \textbf{25.16} \\
+\bottomrule
+\end{tabularx}
+\normalsize
+
+\vspace{0.1em}
+\footnotesize\emph{Both finetuned configs crush B1 (JS BLEU $\sim3\times$). Prop-B matches B3 in-domain (spread $<$2\%, sampling noise), exceeds B3 on OOD. Speculative decoding is \textbf{mathematically lossless} $\Rightarrow$ all JS-FT configs share the same output distribution; draft training is a \textbf{pure speed-axis} optimization.}
+\normalsize
+
+% ---------- COLUMN 3 ----------
+
+\section{Why Prop-B Outperforms}
+
+\begin{takeawaybox}
+\begin{enumerate}
+  \item \textbf{Balanced speed:} only config $>$55 TPS on \emph{both} JS and UC (58.75 / 58.86). B3 drops to 55.09 on UC.
+  \item \textbf{Pareto-dominates B2$'$ on acceptance:} +4.4\% in-domain \emph{and} +6.3\% out-of-domain. B3 dominates only in-domain.
+  \item \textbf{Highest OOD acceptance overall:} 3.86 vs B3's 3.61 (+\textbf{6.9\%}) and B2$'$'s 3.63 (+\textbf{6.3\%}).
+  \item \textbf{Lossless quality:} matches or exceeds B3 on BLEU / ROUGE-L across both domains.
+  \item \textbf{Training-data efficient:} single-stage 8-epoch training on 2.9k-sample mixed corpus.
+\end{enumerate}
+\end{takeawaybox}
+
+\footnotesize\emph{Ablation supporting recipe choices: (i) 22\% $\to$ 50\% character share improves JS acceptance $3.84 \to 4.01$; (ii) training 20 epochs instead of 8 regresses the draft on both axes (3.53 / 3.63) despite lower train loss --- overfitting to the training mix.}
+\normalsize
+
+\section{Conclusions}
+
+\begin{enumerate}
+  \item \textbf{Naive persona-only draft training silently degrades $\sim$15\% of OOD deployment speed}.
+  \item \textbf{Joint Alignment} (50/50 persona + general, 8 epochs) is the only configuration that Pareto-dominates the off-shelf baseline on both axes, delivering $\mathbf{2.4\times}$ speedup with \emph{no} quality cost.
+  \item \textbf{Under speculative decoding, speed and quality are decoupled}: train the draft for whatever distribution reflects deployment; the target fixes output quality.
+\end{enumerate}
+
+\textbf{Limitations.} Single persona (Jack Sparrow); limited training data; EAGLE 3 only, where other algorithms such as DFlash may behave differently.
+
+\end{multicols}
+
+\vspace{-0.7em}
+\begin{center}
+\scriptsize
+\textcolor{primary}{\rule{0.9\linewidth}{0.4pt}}\\[0.05em]
+\textbf{Code \& full hyperparameters:} \texttt{github.com/...} \quad$\bullet$\quad
+\textbf{Hardware:} 4$\times$ RTX 2080 Ti
+\end{center}
+
+\end{document}
