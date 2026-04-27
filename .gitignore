@@ -32,3 +32,13 @@ env/
 wandb/
 runs/
 outputs/
+logs/
+nohup.out
+*.out
+
+# Editor / OS noise
+Screenshot *.png
+.DS_Store
+
+# Assignment-spec PDF (not part of the project source)
+cse398_final_project.pdf

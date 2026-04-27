@@ -1,3 +1,4 @@
+# Core training / inference
 torch>=2.5.0
 torchaudio>=2.5.0
 torchvision>=0.20.0
@@ -12,3 +13,13 @@ safetensors>=0.4.0
 huggingface-hub>=0.20.0
 wandb>=0.16.0
 tqdm>=4.60.0
+
+# Web demo (scripts/webdemo.py)
+gradio>=4.0.0
+
+# Evaluation (scripts/eval_reference_similarity.py)
+sacrebleu>=2.0.0
+rouge-score>=0.1.2
+
+# Plotting (scripts/plot_pareto.py)
+matplotlib>=3.7.0
