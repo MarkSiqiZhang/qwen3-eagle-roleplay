@@ -163,6 +163,20 @@ All commands assume `cwd = repo root` and `conda activate eagle-roleplay`.
 GPU placement uses `CUDA_VISIBLE_DEVICES`; most steps need a single 11 GB
 card, the web demo needs three.
 
+### Quick start — `main.py`
+
+Once data and models are in place (steps 1 + 2 below), the top-level entry
+point can either run a single-prompt inference or launch the live web demo:
+
+```bash
+# single-prompt inference on one GPU (target + Prop-B draft)
+CUDA_VISIBLE_DEVICES=0 python main.py "Captain, what's the plan?"
+CUDA_VISIBLE_DEVICES=0 python main.py --domain general "Explain quicksort in three sentences."
+
+# three-column live web demo (B2' vs B3 vs Prop-B)
+CUDA_VISIBLE_DEVICES=0,1,2 python main.py --demo
+```
+
 ### 1. Get the data
 
 See [`data/readme_data.txt`](data/readme_data.txt). Briefly:
